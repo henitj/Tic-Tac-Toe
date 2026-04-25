@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            overflow: hidden;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .bg-animation span {
+            position: absolute;
+            display: block;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            animation: float 25s linear infinite;
+            bottom: -150px;
+            border-radius: 50%;
+        }
+
+        .bg-animation span:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+        .bg-animation span:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+        .bg-animation span:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+        .bg-animation span:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+        .bg-animation span:nth-child(5) { left: 65%; width: 20px; height: 20px; animation-delay: 0s; }
+        .bg-animation span:nth-child(6) { left: 75%; width: 110px; height: 110px; animation-delay: 3s; }
+        .bg-animation span:nth-child(7) { left: 35%; width: 150px; height: 150px; animation-delay: 7s; }
+        .bg-animation span:nth-child(8) { left: 50%; width: 25px; height: 25px; animation-delay: 15s; animation-duration: 45s; }
+        .bg-animation span:nth-child(9) { left: 20%; width: 15px; height: 15px; animation-delay: 2s; animation-duration: 35s; }
+        .bg-animation span:nth-child(10) { left: 85%; width: 150px; height: 150px; animation-delay: 0s; animation-duration: 11s; }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+                border-radius: 50%;
+            }
+            100% {
+                transform: translateY(-1000px) rotate(720deg);
+                opacity: 0;
+                border-radius: 50%;
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(233, 69, 96, 0.5);
+            letter-spacing: 3px;
+        }
+
+        h1 span:first-child { color: #e94560; }
+        h1 span:nth-child(2) { color: #fff; }
+        h1 span:last-child { color: #0ead69; }
+
+        /* Menu Screen */
+        .menu-screen {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-title {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .mode-selection {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .mode-btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #e94560 0%, #c23a51 100%);
+            border-color: #e94560;
+            box-shadow: 0 10px 30px rgba(233, 69, 96, 0.4);
+        }
+
+        .difficulty-selection {
+            display: none;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .difficulty-selection.show {
+            display: flex;
+        }
+
+        .difficulty-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 25px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .difficulty-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .difficulty-btn.active {
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .difficulty-btn[data-diff="easy"].active {
+            background: linear-gradient(135deg, #0ead69 0%, #0c9456 100%);
+            border-color: #0ead69;
+        }
+
+        .difficulty-btn[data-diff="medium"].active {
+            background: linear-gradient(135deg, #f9a826 0%, #d48d1f 100%);
+            border-color: #f9a826;
+        }
+
+        .difficulty-btn[data-diff="hard"].active {
+            background: linear-gradient(135deg, #e94560 0%, #c23a51 100%);
+            border-color: #e94560;
+        }
+
+        .difficulty-btn[data-diff="impossible"].active {
+            background: linear-gradient(135deg, #9333ea 0%, #7c22ce 100%);
+            border-color: #9333ea;
+        }
+
+        .start-btn {
+            padding: 18px 80px;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            background: linear-gradient(135deg, #e94560 0%, #c23a51 100%);
+            color: #fff;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(233, 69, 96, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(233, 69, 96, 0.5);
+        }
+
+        .start-btn:active {
+            transform: translateY(-2px);
+        }
+
+        /* Game Screen */
+        .game-screen {
+            display: none;
+        }
+
+        .game-screen.show {
+            display: block;
+        }
+
+        .menu-screen.hide {
+            display: none;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+
+        .score-board {
+            display: flex;
+            gap: 30px;
+        }
+
+        .score {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .score.x-score {
+            border-color: rgba(233, 69, 96, 0.5);
+        }
+
+        .score.o-score {
+            border-color: rgba(14, 173, 105, 0.5);
+        }
+
+        .score-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .x-score .score-value { color: #e94560; }
+        .o-score .score-value { color: #0ead69; }
+
+        .turn-indicator {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px 30px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .turn-indicator.x-turn {
+            border-color: rgba(233, 69, 96, 0.5);
+            box-shadow: 0 0 20px rgba(233, 69, 96, 0.2);
+        }
+
+        .turn-indicator.o-turn {
+            border-color: rgba(14, 173, 105, 0.5);
+            box-shadow: 0 0 20px rgba(14, 173, 105, 0.2);
+        }
+
+        .board-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .cell {
+            width: 110px;
+            height: 110px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cell::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .cell:hover:not(.taken) {
+            transform: scale(1.05);
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .cell:hover:not(.taken)::before {
+            opacity: 1;
+        }
+
+        .cell.taken {
+            cursor: default;
+        }
+
+        .cell.winner {
+            animation: winner-pulse 0.6s ease-in-out infinite alternate;
+        }
+
+        @keyframes winner-pulse {
+            from {
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+                border-color: rgba(255, 215, 0, 0.5);
+            }
+            to {
+                box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+                border-color: rgba(255, 215, 0, 0.8);
+            }
+        }
+
+        /* X and O marks */
+        .mark {
+            font-size: 3.5rem;
+            font-weight: 700;
+            animation: pop-in 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .mark.x {
+            color: #e94560;
+            text-shadow: 0 0 30px rgba(233, 69, 96, 0.5);
+        }
+
+        .mark.o {
+            color: #0ead69;
+            text-shadow: 0 0 30px rgba(14, 173, 105, 0.5);
+        }
+
+        @keyframes pop-in {
+            0% {
+                transform: scale(0) rotate(-180deg);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1) rotate(0);
+                opacity: 1;
+            }
+        }
+
+        /* Win line */
+        .win-line {
+            position: absolute;
+            background: linear-gradient(90deg, #ffd700, #ffaa00);
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            z-index: 10;
+            opacity: 0;
+            animation: draw-line 0.5s ease forwards;
+        }
+
+        @keyframes draw-line {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .win-line.horizontal {
+            height: 8px;
+            width: 90%;
+            left: 5%;
+        }
+
+        .win-line.vertical {
+            width: 8px;
+            height: 90%;
+            top: 5%;
+        }
+
+        .win-line.diagonal {
+            height: 8px;
+            width: 130%;
+            left: -15%;
+        }
+
+        /* Buttons */
+        .game-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+        .game-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #fff;
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .reset-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .menu-back-btn {
+            background: linear-gradient(135deg, #e94560 0%, #c23a51 100%);
+            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.3);
+        }
+
+        .menu-back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(233, 69, 96, 0.4);
+        }
+
+        /* Result Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            animation: fade-in 0.3s ease;
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 50px;
+            border-radius: 30px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+            animation: modal-pop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes modal-pop {
+            from {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .modal-title.x-wins { color: #e94560; }
+        .modal-title.o-wins { color: #0ead69; }
+        .modal-title.draw { color: #f9a826; }
+
+        .modal-subtitle {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 30px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #fff;
+        }
+
+        .play-again-btn {
+            background: linear-gradient(135deg, #0ead69 0%, #0c9456 100%);
+            box-shadow: 0 10px 30px rgba(14, 173, 105, 0.4);
+        }
+
+        .play-again-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(14, 173, 105, 0.5);
+        }
+
+        .modal-menu-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-menu-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            z-index: 1000;
+            animation: confetti-fall 3s ease-out forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .menu-screen {
+                padding: 30px 20px;
+                margin: 20px;
+            }
+
+            .mode-selection {
+                flex-direction: column;
+            }
+
+            .cell {
+                width: 80px;
+                height: 80px;
+            }
+
+            .mark {
+                font-size: 2.5rem;
+            }
+
+            .game-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .score-board {
+                gap: 15px;
+            }
+
+            .modal {
+                margin: 20px;
+                padding: 30px;
+            }
+
+            .modal-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <div class="container">
+        <h1><span>TIC</span> <span>TAC</span> <span>TOE</span></h1>
+
+        <!-- Menu Screen -->
+        <div class="menu-screen" id="menuScreen">
+            <p class="menu-title">Select Game Mode</p>
+            
+            <div class="mode-selection">
+                <button class="mode-btn active" data-mode="human">� VS Human</ button>
+                <button class="mode-btn" data-mode="computer">� VS Computer</ button>
+            </div>
+
+            <div class="difficulty-selection" id="difficultySelection">
+                <button class="difficulty-btn active" data-diff="easy">� Easy</ button>
+                <button class="difficulty-btn" data-diff="medium">� Medium</ button>
+                <button class="difficulty-btn" data-diff="hard">� Hard</ button>
+                <button class="difficulty-btn" data-diff="impossible">� Impossible</ button>
+            </div>
+
+            <button class="start-btn" id="startBtn">Start Game</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-screen" id="gameScreen">
+            <div class="game-info">
+                <div class="score-board">
+                    <div class="score x-score">
+                        <div class="score-label">Player X</div>
+                        <div class="score-value" id="xScore">0</div>
+                    </div>
+                    <div class="score o-score">
+                        <div class="score-label">Player O</div>
+                        <div class="score-value" id="oScore">0</div>
+                    </div>
+                </div>
+                <div class="turn-indicator x-turn" id="turnIndicator">X's Turn</div>
+            </div>
+
+            <div class="board-container">
+                <div class="board" id="board">
+                    <div class="cell" data-index="0"></div>
+                    <div class="cell" data-index="1"></div>
+                    <div class="cell" data-index="2"></div>
+                    <div class="cell" data-index="3"></div>
+                    <div class="cell" data-index="4"></div>
+                    <div class="cell" data-index="5"></div>
+                    <div class="cell" data-index="6"></div>
+                    <div class="cell" data-index="7"></div>
+                    <div class="cell" data-index="8"></div>
+                </div>
+                <div class="win-line" id="winLine"></div>
+            </div>
+
+            <div class="game-buttons">
+                <button class="game-btn reset-btn" id="resetBtn">� Reset</button>
+                <button class="game-btn menu-back-btn" id="menuBackBtn">� Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h2 class="modal-title" id="modalTitle">X Wins!</h2>
+            <p class="modal-subtitle" id="modalSubtitle">Congratulations!</p>
+            <div class="modal-buttons">
+                <button class="modal-btn play-again-btn" id="playAgainBtn">Play Again</button>
+                <button class="modal-btn modal-menu-btn" id="modalMenuBtn">Main Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = X';
+        let gameMode = 'human';
+        let difficulty = 'easy';
+        let gameActive = true;
+        let scores = { X: 0, O: 0 };
+
+        // Win Combinations
+        const winCombinations = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+            [0, 4, 8], [2, 4, 6]              // Diagonals
+        ];
+
+        // DOM Elements
+        const menuScreen = document.getElementById('menuScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const difficultySelection = document.getElementById('difficultySelection');
+        const boardElement = document.getElementById('board');
+        const cells = document.querySelectorAll('.cell');
+        const turnIndicator = document.getElementById('turnIndicator');
+        const xScoreElement = document.getElementById('xScore');
+        const oScoreElement = document.getElementById('oScore');
+        const winLine = document.getElementById('winLine');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalSubtitle = document.getElementById('modalSubtitle');
+
+        // Mode Selection
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                gameMode = btn.dataset.mode;
+                
+                if (gameMode === 'computer') {
+                    difficultySelection.classList.add('show');
+                } else {
+                    difficultySelection.classList.remove('show');
+                }
+            });
+        });
+
+        // Difficulty Selection
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                difficulty = btn.dataset.diff;
+            });
+        });
+
+        // Start Game
+        document.getElementById('startBtn').addEventListener('click', () => {
+            menuScreen.classList.add('hide');
+            gameScreen.classList.add('show');
+            resetGame();
+        });
+
+        // Back to Menu
+        document.getElementById('menuBackBtn').addEventListener('click', goToMenu);
+        document.getElementById('modalMenuBtn').addEventListener('click', () => {
+            modalOverlay.classList.remove('show');
+            goToMenu();
+        });
+
+        function goToMenu() {
+            gameScreen.classList.remove('show');
+            menuScreen.classList.remove('hide');
+            scores = { X: 0, O: 0 };
+            updateScoreDisplay();
+        }
+
+        // Reset Game
+        document.getElementById('resetBtn').addEventListener('click', resetGame);
+        document.getElementById('playAgainBtn').addEventListener('click', () => {
+            modalOverlay.classList.remove('show');
+            resetGame();
+        });
+
+        function resetGame() {
+            board = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            gameActive = true;
+            
+            cells.forEach(cell => {
+                cell.innerHTML = '';
+                cell.classList.remove('taken', 'winner');
+            });
+            
+            winLine.style.opacity = '0';
+            winLine.className = 'win-line';
+            
+            updateTurnIndicator();
+        }
+
+        // Cell Click Handler
+        cells.forEach(cell => {
+            cell.addEventListener('click', () => {
+                const index = parseInt(cell.dataset.index);
+                
+                if (board[index] !== '' || !gameActive) return;
+                
+                makeMove(index);
+                
+                if (gameMode === 'computer' && gameActive && currentPlayer === 'O') {
+                    setTimeout(computerMove, 500);
+                }
+            });
+        });
+
+        function makeMove(index) {
+            board[index] = currentPlayer;
+            
+            const cell = cells[index];
+            cell.innerHTML = `<span class="mark ${currentPlayer.toLowerCase()}">${currentPlayer}</span>`;
+            cell.classList.add('taken');
+            
+            const winner = checkWinner();
+            
+            if (winner) {
+                gameActive = false;
+                highlightWinner(winner.combination);
+                scores[winner.player]++;
+                updateScoreDisplay();
+                
+                setTimeout(() => {
+                    showModal(winner.player);
+                }, 600);
+            } else if (board.every(cell => cell !== '')) {
+                gameActive = false;
+                setTimeout(() => showModal('draw'), 300);
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                updateTurnIndicator();
+            }
+        }
+
+        function checkWinner() {
+            for (let combo of winCombinations) {
+                const [a, b, c] = combo;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    return { player: board[a], combination: combo };
+                }
+            }
+            return null;
+        }
+
+        function highlightWinner(combination) {
+            combination.forEach(index => {
+                cells[index].classList.add('winner');
+            });
+            
+            drawWinLine(combination);
+        }
+
+        function drawWinLine(combination) {
+            const [a, , c] = combination;
+            const boardRect = boardElement.getBoundingClientRect();
+            const cellA = cells[a].getBoundingClientRect();
+            const cellC = cells[c].getBoundingClientRect();
+            
+            // Rows
+            if (a === 0 && c === 2) {
+                winLine.classList.add('horizontal');
+                winLine.style.top = '16.66%';
+            } else if (a === 3 && c === 5) {
+                winLine.classList.add('horizontal');
+                winLine.style.top = '50%';
+            } else if (a === 6 && c === 8) {
+                winLine.classList.add('horizontal');
+                winLine.style.top = '83.33%';
+            }
+            // Columns
+            else if (a === 0 && c === 6) {
+                winLine.classList.add('vertical');
+                winLine.style.left = '16.66%';
+            } else if (a === 1 && c === 7) {
+                winLine.classList.add('vertical');
+                winLine.style.left = '50%';
+            } else if (a === 2 && c === 8) {
+                winLine.classList.add('vertical');
+                winLine.style.left = '83.33%';
+            }
+            // Diagonals
+            else if (a === 0 && c === 8) {
+                winLine.classList.add('diagonal');
+                winLine.style.top = '50%';
+                winLine.style.transform = 'rotate(45deg)';
+            } else if (a === 2 && c === 6) {
+                winLine.classList.add('diagonal');
+                winLine.style.top = '50%';
+                winLine.style.transform = 'rotate(-45deg)';
+            }
+            
+            winLine.style.opacity = '1';
+        }
+
+        function updateTurnIndicator() {
+            turnIndicator.textContent = `${currentPlayer}'s Turn`;
+            turnIndicator.className = `turn-indicator ${currentPlayer.toLowerCase()}-turn`;
+        }
+
+        function updateScoreDisplay() {
+            xScoreElement.textContent = scores.X;
+            oScoreElement.textContent = scores.O;
+        }
+
+        function showModal(result) {
+            if (result === 'draw') {
+                modalTitle.textContent = "It's a Draw!";
+                modalTitle.className = 'modal-title draw';
+                modalSubtitle.textContent = "Well played both!";
+            } else {
+                modalTitle.textContent = `${result} Wins!`;
+                modalTitle.className = `modal-title ${result.toLowerCase()}-wins`;
+                modalSubtitle.textContent = result === 'X' ? }"'"}}'}'��'
