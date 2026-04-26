@@ -3,7 +3,9 @@
 # Tic-Tac-Toe (JS)
 
 A clean, efficient version of the classic **Tic-Tac-Toe**. This project explores game theory and decision-making trees by implementing an AI opponent that uses the Minimax algorithm to ensure it never loses.
+
 URL - https://tic-tac-j3yyhw2mj-henitj19-8765s-projects.vercel.app/
+
 ## 🚀 Features
 * **Minimax AI:** A recursive algorithm that evaluates every possible move to play the optimal game.
 * **Modular Logic:** Separation of concerns between the game engine (logic), the UI (display), and the AI (decision-making).
